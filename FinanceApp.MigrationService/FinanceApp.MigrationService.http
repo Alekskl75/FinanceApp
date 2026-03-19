@@ -1,0 +1,6 @@
+@FinanceApp.MigrationService_HostAddress = http://localhost:5208
+
+GET {{FinanceApp.MigrationService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
