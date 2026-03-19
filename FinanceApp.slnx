@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
   <Project Path="FinanceApp.Api/FinanceApp.Api.csproj" />
   <Project Path="FinanceApp.Application/FinanceApp.Application.csproj" />
   <Project Path="FinanceApp.Domain/FinanceApp.Domain.csproj" />
