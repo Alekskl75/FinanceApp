@@ -23,7 +23,7 @@ public class CurrencyRepository(AppDbContext context) : ICurrencyRepository
 
     public async Task<List<Currency>> GetAllAsync()
     {
-        return await context.Currencies.ToListAsync();
+        return await context.Currencies.AsNoTracking().ToListAsync();
     }
 
     public async Task<Currency?> GetByIdAsync(string id)

@@ -3,6 +3,7 @@ using FinanceApp.Application.Models;
 using FinanceApp.Domain;
 using FinanceApp.Domain.Entities;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,20 +12,11 @@ using System.Text;
 
 namespace FinanceApp.Application;
 
-public class UserService : IUserService
+public class UserService(IUserRepository userRepo, ICurrencyRepository currencyRepository, IConfiguration config, ILogger<UserService> logger) : IUserService
 {
-    private readonly IUserRepository _userRepo;
-    private readonly IConfiguration _config;
-
-    public UserService(IUserRepository userRepo, IConfiguration config)
-    {
-        _userRepo = userRepo;
-        _config = config;
-    }
-
     public async Task<Guid> RegisterAsync(RegisterUserCommand command)
     {
-        if (await _userRepo.GetByNameAsync(command.Name) != null)
+        if (await userRepo.GetByNameAsync(command.Name) != null)
             throw new Exception("User already exists.");
 
         var user = new User
@@ -34,13 +26,13 @@ public class UserService : IUserService
             Password = ComputeSha256Hash(command.Password)
         };
 
-        await _userRepo.AddAsync(user);
+        await userRepo.AddAsync(user);
         return user.Id;
     }
 
     public async Task<string> LoginAsync(LoginUserQuery query)
     {
-        var user = await _userRepo.GetByNameAsync(query.Name);
+        var user = await userRepo.GetByNameAsync(query.Name);
         if (user == null || !VerifyPassword(query.Password, user.Password))
             throw new Exception("Invalid credentials.");
 
@@ -55,11 +47,16 @@ public class UserService : IUserService
 
     public async Task UpdateFavoritesAsync(UpdateFavoritesCommand command)
     {
-        var user = await _userRepo.GetByIdAsync(command.UserId);
+        var user = await userRepo.GetByIdAsync(command.UserId);
         if (user == null) throw new Exception("User not found.");
 
-        user.Favorites = command.Favorites;
-        await _userRepo.UpdateAsync(user);
+        var currencyIds = (await currencyRepository.GetAllAsync()).Select(x => x.Id);
+        var badIds = command.Favorites.Except(currencyIds);
+        if (badIds.Any())
+            logger.LogWarning("Неизвестные идентификаторы валют: {badCurrencies}", string.Join(", ", badIds));
+
+        user.Favorites = command.Favorites.Intersect(currencyIds).ToList();
+        await userRepo.UpdateAsync(user);
     }
 
     public static string HashPassword(string password)
@@ -90,7 +87,7 @@ public class UserService : IUserService
 
     private string GenerateJwtToken(User user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
@@ -100,8 +97,8 @@ public class UserService : IUserService
         };
 
         var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
+            issuer: config["Jwt:Issuer"],
+            audience: config["Jwt:Audience"],
             claims: claims,
             expires: DateTime.Now.AddHours(1),
             signingCredentials: creds);

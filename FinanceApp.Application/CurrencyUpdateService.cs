@@ -17,6 +17,9 @@ public class CurrencyUpdateService(
     IHttpClientFactory httpClientFactory,
     IServiceScopeFactory scopeFactory) : BackgroundService
 {
+    const int UpdateIntervalMinutes = 30;
+    const string XmlDailyUrl = "http://www.cbr.ru/scripts/XML_daily.asp";
+
     private ILogger<CurrencyUpdateService>? logger;
     private ICurrencyRepository? currencyRepo;
 
@@ -32,7 +35,7 @@ public class CurrencyUpdateService(
                 await UpdateCurrenciesAsync(stoppingToken);
             }
 
-            await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(UpdateIntervalMinutes), stoppingToken);
         }
     }
 
@@ -42,7 +45,7 @@ public class CurrencyUpdateService(
         {
             var client = httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("Accept", "application/xml");
-            var xml = await client.GetStringAsync("http://www.cbr.ru/scripts/XML_daily.asp", ct);
+            var xml = await client.GetStringAsync(XmlDailyUrl, ct);
             logger?.LogInformation(xml);
 
             var doc = XDocument.Parse(xml);

@@ -6,4 +6,4 @@ using System.Threading.Tasks;
 
 namespace FinanceApp.Application.Models;
 
-public record GetCurrenciesByUserQuery(Guid UserId);
+public record GetCurrenciesByUserQuery(string UserName);

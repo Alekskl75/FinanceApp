@@ -4,6 +4,7 @@ using FinanceApp.Application.Models;
 using FinanceApp.Domain;
 using FinanceApp.Domain.Entities;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace FinanceApp.Tests;
@@ -12,15 +13,19 @@ namespace FinanceApp.Tests;
 public class UserServiceTests
 {
     private Mock<IUserRepository> _userRepoMock;
+    private Mock<ICurrencyRepository> _currencyRepoMock;
     private Mock<IConfiguration> _configMock;
+    private Mock<ILogger<UserService>> _loggerMock;
     private IUserService _userService;
 
     [SetUp]
     public void Setup()
     {
         _userRepoMock = new Mock<IUserRepository>();
+        _currencyRepoMock = new Mock<ICurrencyRepository>();
         _configMock = new Mock<IConfiguration>();
-        _userService = new UserService(_userRepoMock.Object, _configMock.Object);
+        _loggerMock = new Mock<ILogger<UserService>>();
+        _userService = new UserService(_userRepoMock.Object, _currencyRepoMock.Object, _configMock.Object, _loggerMock.Object);
     }
 
     [Test]

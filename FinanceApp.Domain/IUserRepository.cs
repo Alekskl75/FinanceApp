@@ -9,8 +9,8 @@ namespace FinanceApp.Domain;
 
 public interface IUserRepository
 {
-    Task<User> GetByNameAsync(string name);
+    Task<User?> GetByNameAsync(string name);
     Task AddAsync(User user);
     Task UpdateAsync(User user);
-    Task<User> GetByIdAsync(Guid userId);
+    Task<User?> GetByIdAsync(Guid userId);
 }

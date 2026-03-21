@@ -17,11 +17,11 @@ public class CurrencyController : ControllerBase
         _currencyService = currencyService;
     }
 
-    [HttpGet("user/{userId}")]
+    [HttpGet("user/{userName}")]
     [Authorize]
-    public async Task<IActionResult> GetCurrenciesByUser(Guid userId)
+    public async Task<IActionResult> GetCurrenciesByUser(string userName)
     {
-        var query = new GetCurrenciesByUserQuery(userId);
+        var query = new GetCurrenciesByUserQuery(userName);
         var currencies = await _currencyService.GetCurrenciesByUserAsync(query);
         return Ok(currencies);
     }

@@ -1,5 +1,6 @@
 ﻿namespace FinanceApp.Infrastructure;
 
+using FinanceApp.Application;
 using FinanceApp.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,8 +25,9 @@ public class AppDbContext : DbContext
         {
             b.HasKey(u => u.Id);
             b.Property(u => u.Name).IsRequired();
+            b.HasIndex(u => u.Name).IsUnique();
             b.Property(u => u.Password).IsRequired();
-            b.HasData(new User { Id = Guid.NewGuid(), Name = "admin", Password = "admin" });
+            b.HasData(new User { Id = Guid.NewGuid(), Name = "admin", Password = UserService.HashPassword("admin") });
         });
     }
 }

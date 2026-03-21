@@ -16,7 +16,7 @@ public class UserRepository : IUserRepository
 
     public UserRepository(AppDbContext context) => _context = context;
 
-    public async Task<User> GetByNameAsync(string name) =>
+    public async Task<User?> GetByNameAsync(string name) =>
         await _context.Users.FirstOrDefaultAsync(u => u.Name == name);
 
     public async Task AddAsync(User user)
@@ -31,6 +31,6 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<User> GetByIdAsync(Guid userId) => 
+    public async Task<User?> GetByIdAsync(Guid userId) => 
         await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 }

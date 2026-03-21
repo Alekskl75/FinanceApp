@@ -23,7 +23,7 @@ public class CurrencyService : ICurrencyService
 
     public async Task<List<Currency>> GetCurrenciesByUserAsync(GetCurrenciesByUserQuery query)
     {
-        var user = await _userRepo.GetByIdAsync(query.UserId);
+        var user = await _userRepo.GetByNameAsync(query.UserName);
         if (user == null) throw new Exception("User not found.");
 
         var currencies = await _currencyRepo.GetAllAsync();

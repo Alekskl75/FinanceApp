@@ -9,23 +9,14 @@ namespace FinanceApp.Api.Controllers
 {
     [ApiController]
     [Route("api/users")]
-    public class UserController : ControllerBase
+    public class UserController(IUserService userService, IConfiguration config) : ControllerBase
     {
-        private readonly IUserService _userService;
-        private readonly IConfiguration _config;
-
-        public UserController(IUserService userService, IConfiguration config)
-        {
-            _userService = userService;
-            _config = config;
-        }
-
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserCommand command)
         {
             try
             {
-                var userId = await _userService.RegisterAsync(command);
+                var userId = await userService.RegisterAsync(command);
                 return CreatedAtAction(nameof(GetUser), new { id = userId }, userId);
             }
             catch (Exception ex)
@@ -39,7 +30,7 @@ namespace FinanceApp.Api.Controllers
         {
             try
             {
-                var token = await _userService.LoginAsync(query);
+                var token = await userService.LoginAsync(query);
                 return Ok(new { token });
             }
             catch (Exception ex)
@@ -53,7 +44,7 @@ namespace FinanceApp.Api.Controllers
         public async Task<IActionResult> Logout()
         {
             var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            await _userService.LogoutAsync(userId);
+            await userService.LogoutAsync(userId);
             return NoContent();
         }
 
@@ -66,7 +57,7 @@ namespace FinanceApp.Api.Controllers
 
             try
             {
-                await _userService.UpdateFavoritesAsync(command);
+                await userService.UpdateFavoritesAsync(command);
                 return NoContent();
             }
             catch (Exception ex)
