@@ -30,7 +30,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
-// Add services to the container.
+builder.Services.AddSingleton<IDbConnectionFactory>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("PostgresConnection");
+    if (string.IsNullOrEmpty(connectionString))
+        throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
+
+    return new PostgresConnectionFactory(connectionString);
+});
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
